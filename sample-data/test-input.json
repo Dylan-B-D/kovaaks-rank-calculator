@@ -1,0 +1,624 @@
+{
+  "apiData": {
+    "benchmark_progress": 112185.22,
+    "overall_rank": 2,
+    "categories": {
+      "Clicking": {
+        "benchmark_progress": 34302.05,
+        "category_rank": 2,
+        "rank_maxes": [
+          15000,
+          30000,
+          45000,
+          60000
+        ],
+        "scenarios": {
+          "VT Pasu Advanced S5": {
+            "score": 102253,
+            "leaderboard_rank": 144,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              910,
+              1020,
+              1110,
+              1240
+            ],
+            "leaderboard_id": 98023
+          },
+          "VT Popcorn Advanced S5": {
+            "score": 83000,
+            "leaderboard_rank": 50,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              680,
+              800,
+              910,
+              1020
+            ],
+            "leaderboard_id": 98024
+          },
+          "VT 1w2ts Advanced S5": {
+            "score": 142341,
+            "leaderboard_rank": 142,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              1320,
+              1420,
+              1520,
+              1620
+            ],
+            "leaderboard_id": 98025
+          },
+          "VT ww5t Advanced S5": {
+            "score": 167000,
+            "leaderboard_rank": 60,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              1510,
+              1610,
+              1720,
+              1860
+            ],
+            "leaderboard_id": 98026
+          },
+          "VT Frogtagon Advanced S5": {
+            "score": 123000,
+            "leaderboard_rank": 86,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              1090,
+              1220,
+              1360,
+              1490
+            ],
+            "leaderboard_id": 105776
+          },
+          "VT Floating Heads Advanced S5": {
+            "score": 89921,
+            "leaderboard_rank": 61,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              740,
+              830,
+              920,
+              1050
+            ],
+            "leaderboard_id": 98012
+          }
+        }
+      },
+      "Tracking": {
+        "benchmark_progress": 40973.17,
+        "category_rank": 2,
+        "rank_maxes": [
+          15000,
+          30000,
+          45000,
+          60000
+        ],
+        "scenarios": {
+          "VT PGT Advanced S5": {
+            "score": 409300,
+            "leaderboard_rank": 7,
+            "scenario_rank": 4,
+            "rank_maxes": [
+              2750,
+              3175,
+              3625,
+              4050
+            ],
+            "leaderboard_id": 98255
+          },
+          "VT Snake Track Advanced S5": {
+            "score": 378000,
+            "leaderboard_rank": 59,
+            "scenario_rank": 3,
+            "rank_maxes": [
+              3050,
+              3425,
+              3725,
+              4050
+            ],
+            "leaderboard_id": 98297
+          },
+          "VT Aether Advanced S5": {
+            "score": 320400,
+            "leaderboard_rank": 154,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              2750,
+              3175,
+              3525,
+              3825
+            ],
+            "leaderboard_id": 100140
+          },
+          "VT Ground Advanced S5": {
+            "score": 321900,
+            "leaderboard_rank": 146,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              2875,
+              3200,
+              3500,
+              3725
+            ],
+            "leaderboard_id": 100768
+          },
+          "VT Raw Control Advanced S5": {
+            "score": 362700,
+            "leaderboard_rank": 106,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              3150,
+              3550,
+              3875,
+              4250
+            ],
+            "leaderboard_id": 98253
+          },
+          "VT Controlsphere Advanced S5": {
+            "score": 374700,
+            "leaderboard_rank": 57,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              3100,
+              3475,
+              3800,
+              4125
+            ],
+            "leaderboard_id": 103114
+          }
+        }
+      },
+      "Switching": {
+        "benchmark_progress": 36910,
+        "category_rank": 2,
+        "rank_maxes": [
+          15000,
+          30000,
+          45000,
+          60000
+        ],
+        "scenarios": {
+          "VT DotTS Advanced S5": {
+            "score": 137500,
+            "leaderboard_rank": 71,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              1280,
+              1360,
+              1420,
+              1500
+            ],
+            "leaderboard_id": 104961
+          },
+          "VT EddieTS Advanced S5": {
+            "score": 113000,
+            "leaderboard_rank": 89,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              1020,
+              1120,
+              1200,
+              1280
+            ],
+            "leaderboard_id": 104864
+          },
+          "VT DriftTS Advanced S5": {
+            "score": 50020,
+            "leaderboard_rank": 49,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              430,
+              470,
+              510,
+              540
+            ],
+            "leaderboard_id": 104866
+          },
+          "VT FlyTS Advanced S5": {
+            "score": 61900,
+            "leaderboard_rank": 59,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              540,
+              600,
+              660,
+              720
+            ],
+            "leaderboard_id": 105143
+          },
+          "VT ControlTS Advanced S5": {
+            "score": 50000,
+            "leaderboard_rank": 76,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              450,
+              490,
+              520,
+              550
+            ],
+            "leaderboard_id": 104833
+          },
+          "VT Penta Bounce Advanced S5": {
+            "score": 62920,
+            "leaderboard_rank": 32,
+            "scenario_rank": 2,
+            "rank_maxes": [
+              530,
+              580,
+              630,
+              670
+            ],
+            "leaderboard_id": 98619
+          }
+        }
+      }
+    },
+    "ranks": [
+      {
+        "icon": "https://storage.googleapis.com/cdn_dev/benchmarks/ranks/KvK/Rank00.svg",
+        "name": "No Rank",
+        "color": "#ffffff",
+        "frame": "https://storage.googleapis.com/cdn_dev/benchmarks/frames/general/Rank01.svg",
+        "description": "This is No rank!",
+        "playercard_large": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Lg_01.png",
+        "playercard_small": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Sm_01.png"
+      },
+      {
+        "icon": "https://storage.googleapis.com/cdn_dev/benchmarks/ranks/general/Rank09.svg",
+        "name": "Grandmaster",
+        "color": "#ffffff",
+        "frame": "https://storage.googleapis.com/cdn_dev/benchmarks/frames/general/Rank01.svg",
+        "description": "-",
+        "playercard_large": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Lg_01.png",
+        "playercard_small": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Sm_01.png"
+      },
+      {
+        "icon": "https://storage.googleapis.com/cdn_dev/benchmarks/ranks/general/Rank10.svg",
+        "name": "Nova",
+        "color": "#ffffff",
+        "frame": "https://storage.googleapis.com/cdn_dev/benchmarks/frames/general/Rank01.svg",
+        "description": "-",
+        "playercard_large": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Lg_01.png",
+        "playercard_small": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Sm_01.png"
+      },
+      {
+        "icon": "https://storage.googleapis.com/cdn_dev/benchmarks/ranks/general/Rank11.svg",
+        "name": "Astra",
+        "color": "#ffffff",
+        "frame": "https://storage.googleapis.com/cdn_dev/benchmarks/frames/general/Rank01.svg",
+        "description": "-",
+        "playercard_large": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Lg_01.png",
+        "playercard_small": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Sm_01.png"
+      },
+      {
+        "icon": "https://storage.googleapis.com/cdn_dev/benchmarks/ranks/general/Rank12.svg",
+        "name": "Celestial",
+        "color": "#ffffff",
+        "frame": "https://storage.googleapis.com/cdn_dev/benchmarks/frames/general/Rank01.svg",
+        "description": "-",
+        "playercard_large": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Lg_01.png",
+        "playercard_small": "https://storage.googleapis.com/cdn_dev/benchmarks/cards/general/Sm_01.png"
+      }
+    ]
+  },
+  "benchmark": {
+    "benchmarkName": "Voltaic S5",
+    "rankCalculation": "vt-energy",
+    "abbreviation": "VT",
+    "color": "#02A2DA",
+    "spreadsheetURL": "https://docs.google.com/spreadsheets/d/1RjVJi9AdWLXIOkKR8z6mhmRo_SNokJPxKtLXHWk12Z4",
+    "dateAdded": "2025-05-30",
+    "difficulties": [
+      {
+        "difficultyName": "Novice",
+        "kovaaksBenchmarkId": 459,
+        "sharecode": "KovaaKsBouncingSilverBinding",
+        "rankColors": {
+          "Iron": "#999999",
+          "Bronze": "#FF9900",
+          "Silver": "#CBD9E6",
+          "Gold": "#CAB148"
+        },
+        "categories": [
+          {
+            "categoryName": "Clicking",
+            "color": "#CC0000",
+            "subcategories": [
+              {
+                "subcategoryName": "Dynamic",
+                "scenarioCount": 2,
+                "color": "#F1C232"
+              },
+              {
+                "subcategoryName": "Static",
+                "scenarioCount": 2,
+                "color": "#E06666"
+              },
+              {
+                "subcategoryName": "Linear",
+                "scenarioCount": 2,
+                "color": "#FF8A45"
+              }
+            ]
+          },
+          {
+            "categoryName": "Tracking",
+            "color": "#1155CC",
+            "subcategories": [
+              {
+                "subcategoryName": "Precise",
+                "scenarioCount": 2,
+                "color": "#45818E"
+              },
+              {
+                "subcategoryName": "Reactive",
+                "scenarioCount": 2,
+                "color": "#3C78D8"
+              },
+              {
+                "subcategoryName": "Control",
+                "scenarioCount": 2,
+                "color": "#42A5FF"
+              }
+            ]
+          },
+          {
+            "categoryName": "Switching",
+            "color": "#351C75",
+            "subcategories": [
+              {
+                "subcategoryName": "Speed",
+                "scenarioCount": 2,
+                "color": "#A64D79"
+              },
+              {
+                "subcategoryName": "Evasive",
+                "scenarioCount": 2,
+                "color": "#674EA7"
+              },
+              {
+                "subcategoryName": "Stability",
+                "scenarioCount": 2,
+                "color": "#B4A3FF"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "difficultyName": "Intermediate",
+        "kovaaksBenchmarkId": 458,
+        "sharecode": "KovaaKsBottingShinyDoor",
+        "rankColors": {
+          "Platinum": "#2FCFC2",
+          "Diamond": "#B9F2FF",
+          "Jade": "#85FA85",
+          "Master": "#EC44CA"
+        },
+        "categories": [
+          {
+            "categoryName": "Clicking",
+            "color": "#CC0000",
+            "subcategories": [
+              {
+                "subcategoryName": "Dynamic",
+                "scenarioCount": 2,
+                "color": "#F1C232"
+              },
+              {
+                "subcategoryName": "Static",
+                "scenarioCount": 2,
+                "color": "#E06666"
+              },
+              {
+                "subcategoryName": "Linear",
+                "scenarioCount": 2,
+                "color": "#FF8A45"
+              }
+            ]
+          },
+          {
+            "categoryName": "Tracking",
+            "color": "#1155CC",
+            "subcategories": [
+              {
+                "subcategoryName": "Precise",
+                "scenarioCount": 2,
+                "color": "#45818E"
+              },
+              {
+                "subcategoryName": "Reactive",
+                "scenarioCount": 2,
+                "color": "#3C78D8"
+              },
+              {
+                "subcategoryName": "Control",
+                "scenarioCount": 2,
+                "color": "#42A5FF"
+              }
+            ]
+          },
+          {
+            "categoryName": "Switching",
+            "color": "#351C75",
+            "subcategories": [
+              {
+                "subcategoryName": "Speed",
+                "scenarioCount": 2,
+                "color": "#A64D79"
+              },
+              {
+                "subcategoryName": "Evasive",
+                "scenarioCount": 2,
+                "color": "#674EA7"
+              },
+              {
+                "subcategoryName": "Stability",
+                "scenarioCount": 2,
+                "color": "#B4A3FF"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "difficultyName": "Advanced",
+        "kovaaksBenchmarkId": 460,
+        "sharecode": "KovaaKsBobbingSepiaBuff",
+        "rankColors": {
+          "Grandmaster": "#FFD700",
+          "Nova": "#7900FF",
+          "Astra": "#FF2262",
+          "Celestial": "#24DDD8"
+        },
+        "categories": [
+          {
+            "categoryName": "Clicking",
+            "color": "#CC0000",
+            "subcategories": [
+              {
+                "subcategoryName": "Dynamic",
+                "scenarioCount": 2,
+                "color": "#F1C232"
+              },
+              {
+                "subcategoryName": "Static",
+                "scenarioCount": 2,
+                "color": "#E06666"
+              },
+              {
+                "subcategoryName": "Linear",
+                "scenarioCount": 2,
+                "color": "#FF8A45"
+              }
+            ]
+          },
+          {
+            "categoryName": "Tracking",
+            "color": "#1155CC",
+            "subcategories": [
+              {
+                "subcategoryName": "Precise",
+                "scenarioCount": 2,
+                "color": "#45818E"
+              },
+              {
+                "subcategoryName": "Reactive",
+                "scenarioCount": 2,
+                "color": "#3C78D8"
+              },
+              {
+                "subcategoryName": "Control",
+                "scenarioCount": 2,
+                "color": "#42A5FF"
+              }
+            ]
+          },
+          {
+            "categoryName": "Switching",
+            "color": "#351C75",
+            "subcategories": [
+              {
+                "subcategoryName": "Speed",
+                "scenarioCount": 2,
+                "color": "#A64D79"
+              },
+              {
+                "subcategoryName": "Evasive",
+                "scenarioCount": 2,
+                "color": "#674EA7"
+              },
+              {
+                "subcategoryName": "Stability",
+                "scenarioCount": 2,
+                "color": "#B4A3FF"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "difficultyName": "Elite (Unofficial)",
+        "kovaaksBenchmarkId": 475,
+        "sharecode": "KovaaKsMainingIndigoPatrol",
+        "rankColors": {
+          "Nova": "#7900FF",
+          "Astra": "#FF2262",
+          "Celestial": "#24DDD8",
+          "Stellaris": "#979DDA",
+          "Lunara": "#54418E",
+          "Solara": "#FCFFA0"
+        },
+        "categories": [
+          {
+            "categoryName": "Clicking",
+            "color": "#CC0000",
+            "subcategories": [
+              {
+                "subcategoryName": "Dynamic",
+                "scenarioCount": 2,
+                "color": "#F1C232"
+              },
+              {
+                "subcategoryName": "Static",
+                "scenarioCount": 2,
+                "color": "#E06666"
+              },
+              {
+                "subcategoryName": "Linear",
+                "scenarioCount": 2,
+                "color": "#FF8A45"
+              }
+            ]
+          },
+          {
+            "categoryName": "Tracking",
+            "color": "#1155CC",
+            "subcategories": [
+              {
+                "subcategoryName": "Precise",
+                "scenarioCount": 2,
+                "color": "#45818E"
+              },
+              {
+                "subcategoryName": "Reactive",
+                "scenarioCount": 2,
+                "color": "#3C78D8"
+              },
+              {
+                "subcategoryName": "Control",
+                "scenarioCount": 2,
+                "color": "#42A5FF"
+              }
+            ]
+          },
+          {
+            "categoryName": "Switching",
+            "color": "#351C75",
+            "subcategories": [
+              {
+                "subcategoryName": "Speed",
+                "scenarioCount": 2,
+                "color": "#A64D79"
+              },
+              {
+                "subcategoryName": "Evasive",
+                "scenarioCount": 2,
+                "color": "#674EA7"
+              },
+              {
+                "subcategoryName": "Stability",
+                "scenarioCount": 2,
+                "color": "#B4A3FF"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficulty": "advanced"
+}

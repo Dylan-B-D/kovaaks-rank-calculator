@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build": "bun build cli/kovaaks-rank-cli.ts --compile --outfile output/kovaaks-rank-cli",
+    "build:windows": "bun build cli/kovaaks-rank-cli.ts --compile --outfile output/kovaaks-rank-cli.exe",
+    "build:linux": "bun build cli/kovaaks-rank-cli.ts --compile --outfile output/kovaaks-rank-cli",
+    "build:macos": "bun build cli/kovaaks-rank-cli.ts --compile --outfile output/kovaaks-rank-cli"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1"
+  }
+}
