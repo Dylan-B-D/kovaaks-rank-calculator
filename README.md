@@ -3,6 +3,17 @@
 A rank calculation system for KovaaK's benchmarks.
 Includes a standalone CLI executable and Python bindings.
 
+## Documentation
+- **[Setup Guide](docs/setup.md)** - Installation and building
+- **[CLI Usage](docs/cli-usage.md)** - Command-line interface guide
+- **[Python API](docs/python-api.md)** - Python wrapper documentation
+- **[TypeScript Usage](docs/typescript-usage.md)** - Direct TypeScript usage
+- **[API Modes Reference](docs/api-modes.md)** - All available modes and features
+
+**Examples:**
+- [Python Examples](examples/python/) - Python scripts
+- [PowerShell Examples](examples/powershell/) - PowerShell usage examples
+
 ## Build the Executable
 
 First, you'll need to build the CLI executable. This handles all logic such as fetching data, calculating ranks etc.
@@ -97,6 +108,8 @@ echo '{"steamId": "...", "benchmarkName": "Voltaic S5", "difficulty": "Advanced"
 - `src/`: Core TypeScript logic
 - `cli/`: CLI wrapper code
 - `bindings/`: Language bindings (Python) and data
+- `examples/`: Example scripts
+- `docs/`: Documentation
 - `output/`: Compiled executables
 
 ## License
