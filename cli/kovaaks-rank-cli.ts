@@ -3,24 +3,33 @@
  * Reads JSON from stdin, calculates rank, outputs JSON to stdout
  * 
  * Usage (bash/Linux/macOS):
- *   echo '{"apiData": {...}, "benchmark": {...}, "difficulty": "novice"}' | bun run cli/kovaaks-rank-cli.ts
+ *   echo '{"apiData": {...}, "benchmark": {...}, "difficulty": "novice"}' | npx ts-node cli/kovaaks-rank-cli.ts
  * 
  * Usage (PowerShell/Windows):
- *   '{"apiData": {...}, "benchmark": {...}, "difficulty": "novice"}' | bun run cli/kovaaks-rank-cli.ts
+ *   '{"apiData": {...}, "benchmark": {...}, "difficulty": "novice"}' | npx ts-node cli/kovaaks-rank-cli.ts
  * 
  * Or compile to standalone executable:
- *   bun build cli/kovaaks-rank-cli.ts --compile --outfile output/kovaaks-rank-cli
- *   
- * On Windows:
- *   bun build cli/kovaaks-rank-cli.ts --compile --outfile output/kovaaks-rank-cli.exe
+ *   npm run build
  */
 
 import { calculateOverallRank } from '../src/rankCalculations';
 import type { BenchmarkApiData, Benchmark } from '../src/types/benchmarks';
+import { readFileSync } from 'fs';
+
+// Import benchmarks data directly
+// @ts-ignore
+import benchmarksData from '../bindings/data/benchmarks.json';
 
 interface CliInput {
-  apiData: BenchmarkApiData;
-  benchmark: Benchmark;
+  // Required for Mode 1 Direct Data
+  apiData?: BenchmarkApiData;
+  benchmark?: Benchmark;
+  
+  // Required for Mode 2 Simplified Input
+  steamId?: string;
+  benchmarkName?: string;
+  
+  // Always required
   difficulty: string;
 }
 
@@ -36,7 +45,46 @@ interface CliOutput {
   error?: string;
 }
 
-import { readFileSync } from 'fs';
+function findBenchmark(name: string, difficulty: string): { benchmark: Benchmark, kovaaksId: number } {
+  const benchmarks = benchmarksData as any[];
+  
+  for (const b of benchmarks) {
+    if (b.benchmarkName.toLowerCase() === name.toLowerCase()) {
+      for (const d of b.difficulties) {
+        if (d.difficultyName.toLowerCase() === difficulty.toLowerCase()) {
+          return { benchmark: b, kovaaksId: d.kovaaksBenchmarkId };
+        }
+      }
+      
+      const availableDiffs = b.difficulties.map((d: any) => d.difficultyName).join(', ');
+      throw new Error(`Difficulty '${difficulty}' not found for benchmark '${name}'. Available: ${availableDiffs}`);
+    }
+  }
+  
+  // Suggest benchmarks
+  const available = benchmarks.slice(0, 5).map(b => b.benchmarkName).join(', ');
+  throw new Error(`Benchmark '${name}' not found. Some available: ${available}...`);
+}
+
+async function fetchApiData(steamId: string, benchmarkId: number): Promise<BenchmarkApiData> {
+  const url = `https://kovaaks.com/webapp-backend/benchmarks/player-progress-rank-benchmark?benchmarkId=${benchmarkId}&steamId=${steamId}`;
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`No data found for Steam ID '${steamId}' on benchmark ID ${benchmarkId}.`);
+      }
+      throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json() as BenchmarkApiData;
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    throw new Error(`Network error: ${String(error)}`);
+  }
+}
 
 async function main() {
   try {
@@ -44,11 +92,10 @@ async function main() {
     try {
       input = readFileSync(0, 'utf-8');
     } catch (e) {
-      console.error("DEBUG: Error reading stdin:", e);
+      // console.error("DEBUG: Error reading stdin:", e);
       throw e;
     }
 
-    
     if (!input || input.trim() === '') {
       throw new Error('No input provided. Please pipe JSON data to stdin.');
     }
@@ -61,20 +108,35 @@ async function main() {
       throw new Error(`Invalid JSON input: ${(parseError as Error).message}`);
     }
 
-    if (!parsed.apiData) {
-      throw new Error('Missing required field: apiData');
-    }
-    if (!parsed.benchmark) {
-      throw new Error('Missing required field: benchmark');
-    }
     if (!parsed.difficulty) {
       throw new Error('Missing required field: difficulty');
     }
 
+    let apiData: BenchmarkApiData;
+    let benchmark: Benchmark;
+
+    // Check which mode to use
+    if (parsed.steamId && parsed.benchmarkName) {
+      // Mode 2: Simplified input
+      // console.error(`DEBUG: Using simplified mode for ${parsed.benchmarkName} / ${parsed.difficulty}`);
+      
+      const found = findBenchmark(parsed.benchmarkName, parsed.difficulty);
+      benchmark = found.benchmark;
+      apiData = await fetchApiData(parsed.steamId, found.kovaaksId);
+      
+    } else if (parsed.apiData && parsed.benchmark) {
+      // Mode 1: Direct data
+      apiData = parsed.apiData;
+      benchmark = parsed.benchmark;
+      
+    } else {
+      throw new Error('Invalid input. Provide either (steamId, benchmarkName, difficulty) OR (apiData, benchmark, difficulty).');
+    }
+
     // Calculate rank
     const result = calculateOverallRank(
-      parsed.apiData,
-      parsed.benchmark,
+      apiData,
+      benchmark,
       parsed.difficulty
     );
 

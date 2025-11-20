@@ -1,123 +1,103 @@
 # KovaaK's Rank API
 
-A standalone rank calculation system for KovaaK's benchmarks, providing both a CLI executable and language bindings for easy integration.
+A rank calculation system for KovaaK's benchmarks.
+Includes a standalone CLI executable and Python bindings.
 
-## Project Structure
+## Build the Executable
 
-```
-KovaaKs Rank API/
-├── cli/                    # CLI executable source
-│   └── kovaaks-rank-cli.ts
-├── src/                    # Core rank calculation library
-│   ├── rankCalculations.ts
-│   ├── rankUtils.ts
-│   └── types/
-├── bindings/               # Language bindings
-│   └── python/
-│       └── kovaaks_rank_api.py
-├── examples/               # Usage examples
-│   └── python_example.py
-├── sample-data/            # Test data
-└── output/                 # Compiled executables
-```
+First, you must build the CLI executable. This handles all the complex logic (fetching data, calculating ranks).
 
-## Building the Executable
+**Prerequisites:** [Node.js](https://nodejs.org/)
 
-You need [Bun](https://bun.sh) installed.
-
-### Windows
 ```bash
-npm run build:windows
-```
+# Install dependencies
+npm install
 
-### Linux/macOS
-```bash
+# Build for Windows (creates output/kovaaks-rank-cli.exe)
 npm run build
+
+# Build for Linux (creates output/kovaaks-rank-cli)
+npm run build:linux
+
+# Build for macOS (creates output/kovaaks-rank-cli)
+npm run build:macos
 ```
 
-This creates the executable at `output/kovaaks-rank-cli.exe` (Windows) or `output/kovaaks-rank-cli` (Linux/macOS).
+The executable will be created in the `output/` directory (~36MB cause typsecript is bad).
 
-## Usage
+## Python API
 
-### CLI Direct Usage
+You can use the Python wrapper to calculate ranks.
 
-Pipe JSON input to the executable:
+### Setup
 
-**Windows (PowerShell):**
-```powershell
-type sample-data\test-input.json | output\kovaaks-rank-cli.exe
+Either:
+1. Copy `bindings/python/kovaaks_rank_api.py` to your project.
+2. Or add `bindings/python` to your Python path.
+
+**Important:** If you move the Python file, you must tell it where the executable is located.
+
+### Usage
+
+```python
+from kovaaks_rank_api import KovaaksRankAPI
+
+# Option A: works if using original directory structure
+api = KovaaksRankAPI()
+
+# Option B: Specify executable path (RECOMMENDED if copying files)
+api = KovaaksRankAPI(executable_path="path/to/kovaaks-rank-cli.exe")
+
+try:
+    result = api.calculate_rank(
+        steam_id="76561198012345678",
+        benchmark_name="Voltaic S5",
+        difficulty="Advanced"
+    )
+
+    print(f"Rank: {result['rankName']}")
+    print(f"Progress: {result['details']['progressToNextRank']:.2%}")
+
+except Exception as e:
+    print(f"Error: {e}")
 ```
 
-**Linux/macOS:**
-```bash
-cat sample-data/test-input.json | ./output/kovaaks-rank-cli
+### Available Benchmarks
+See `bindings/data/benchmarks.json` for the complete list of supported benchmarks and difficulties.
+
+## CLI Usage
+
+You can also use the executable directly from any language by piping JSON to it.
+
+**Simple Mode:**
+```json
+{
+  "steamId": "76561198012345678",
+  "benchmarkName": "Voltaic S5",
+  "difficulty": "Advanced"
+}
 ```
 
-**Input Format:**
+**Advanced Mode:**
+You can also provide the raw API data and benchmark definition if you want to avoid the CLI fetching data itself.
 ```json
 {
   "apiData": { ... },
   "benchmark": { ... },
-  "difficulty": "novice"
+  "difficulty": "Advanced"
 }
 ```
 
-**Output Format:**
-```json
-{
-  "success": true,
-  "result": {
-    "rank": 3,
-    "rankName": "Gold",
-    "useComplete": true,
-    "details": {
-      "harmonicMean": 1234.56,
-      "progressToNextRank": 0.75
-    }
-  }
-}
+**Example (Windows PowerShell):**
+```powershell
+echo '{"steamId": "...", "benchmarkName": "Voltaic S5", "difficulty": "Advanced"}' | output\kovaaks-rank-cli.exe
 ```
 
-### Python API
-
-Install the Python binding by adding the `bindings/python` directory to your Python path, or copy `kovaaks_rank_api.py` to your project.
-
-**Basic Usage:**
-```python
-from kovaaks_rank_api import KovaaksRankAPI
-
-# Initialize (auto-detects executable location)
-api = KovaaksRankAPI()
-
-# Calculate rank
-result = api.calculate_rank(
-    api_data=your_api_data,
-    benchmark=your_benchmark,
-    difficulty="novice"
-)
-
-print(f"Rank: {result['rankName']}")
-print(f"Progress: {result['details']['progressToNextRank']:.2%}")
-```
-
-**Run the example:**
-```bash
-python examples/python_example.py
-```
-
-### Other Languages
-
-The CLI executable can be called from any language that supports:
-- Running subprocess/shell commands
-- Piping JSON to stdin
-- Reading JSON from stdout
-
-See the Python implementation in `bindings/python/kovaaks_rank_api.py` as a reference.
-
-## Development
-
-The core rank calculation logic is in `src/`, which is imported by the CLI wrapper in `cli/`. To modify the calculation logic, edit files in `src/`. To modify the CLI interface, edit `cli/kovaaks-rank-cli.ts`.
+## Development structure
+- `src/`: Core TypeScript logic
+- `cli/`: CLI wrapper code
+- `bindings/`: Language bindings (Python) and data
+- `output/`: Compiled executables
 
 ## License
-
-[Add your license here]
+GNU GPLv3
