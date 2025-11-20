@@ -45,6 +45,19 @@ interface CliInput {
     startDate?: string;  // Optional: ISO date (YYYY-MM-DD) - only scores on or after
     endDate?: string;  // Optional: ISO date (YYYY-MM-DD) - only scores on or before
   };
+  // Optional: Return only the API data without calculating rank
+  fetchOnly?: boolean;
+  
+  // Optional: Batch mode - calculate rank for multiple dates
+  // Scans stats once and calculates rank for each date
+  batchDates?: string[];  // Array of ISO dates (YYYY-MM-DD)
+
+  // Optional: Batch overrides mode - calculate rank for multiple sets of overrides
+  // Used when overrides are pre-calculated (e.g. by Python script)
+  batchOverrides?: Array<{
+    date: string;
+    scoreOverrides: number[];
+  }>;
 }
 
 interface CliOutput {
@@ -272,10 +285,13 @@ function applyScoreOverrides(apiData: BenchmarkApiData, overrides: number[]) {
 }
 
 async function main() {
+  const perfStart = performance.now();
   try {
     let input;
     try {
+      const readStart = performance.now();
       input = readFileSync(0, 'utf-8');
+      console.error(`[PERF] Read stdin: ${(performance.now() - readStart).toFixed(2)}ms`);
     } catch (e) {
       // console.error("DEBUG: Error reading stdin:", e);
       throw e;
@@ -303,8 +319,6 @@ async function main() {
     // Check which mode to use
     if (parsed.steamId && parsed.benchmarkName) {
       // Mode 2: Simplified input
-      // console.error(`DEBUG: Using simplified mode for ${parsed.benchmarkName} / ${parsed.difficulty}`);
-      
       const found = findBenchmark(parsed.benchmarkName, parsed.difficulty);
       benchmark = found.benchmark;
       apiData = await fetchApiData(parsed.steamId, found.kovaaksId);
@@ -316,6 +330,85 @@ async function main() {
       
     } else {
       throw new Error('Invalid input. Provide either (steamId, benchmarkName, difficulty) OR (apiData, benchmark, difficulty).');
+    }
+
+    // If fetchOnly is requested, return the API data directly
+    if (parsed.fetchOnly) {
+      console.log(JSON.stringify({ success: true, data: apiData }));
+      process.exit(0);
+    }
+
+    // Batch mode: Calculate rank for multiple dates
+    if (parsed.batchDates && Array.isArray(parsed.batchDates) && parsed.batchDates.length > 0) {
+      if (!parsed.config || !parsed.config.statsDir) {
+        throw new Error('Batch mode requires config.statsDir to be set');
+      }
+      
+      const results = [];
+      
+      for (const date of parsed.batchDates) {
+        // Create a copy of apiData for this date
+        const apiDataCopy = JSON.parse(JSON.stringify(apiData));
+        
+        // Apply stats overrides with endDate filter
+        const configWithDate = { ...parsed.config, endDate: date };
+        applyStatsOverrides(apiDataCopy, configWithDate);
+        
+        // Calculate rank
+        const result = calculateOverallRank(
+          apiDataCopy,
+          benchmark,
+          parsed.difficulty
+        );
+        
+        results.push({
+          date,
+          ...result
+        });
+      }
+      
+      const output = {
+        success: true,
+        results
+      };
+      
+      console.log(JSON.stringify(output));
+      process.exit(0);
+    }
+
+    // Batch Overrides Mode: Calculate rank for multiple sets of overrides
+    if (parsed.batchOverrides && Array.isArray(parsed.batchOverrides) && parsed.batchOverrides.length > 0) {
+        const results = [];
+        
+        for (const item of parsed.batchOverrides) {
+            if (!item.scoreOverrides) continue;
+
+            // Create a copy of apiData for this item
+            const apiDataCopy = JSON.parse(JSON.stringify(apiData));
+            
+            // Apply score overrides
+            applyScoreOverrides(apiDataCopy, item.scoreOverrides);
+            
+            // Calculate rank
+            const result = calculateOverallRank(
+                apiDataCopy,
+                benchmark,
+                parsed.difficulty
+            );
+            
+            results.push({
+                date: item.date,
+                ...result
+            });
+        }
+        
+        const output = {
+            success: true,
+            results
+        };
+        
+        console.log(JSON.stringify(output));
+        process.exit(0);
     }
 
     // Apply stats overrides if provided
