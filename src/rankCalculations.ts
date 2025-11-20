@@ -1125,6 +1125,9 @@ function calculateBasicRank(apiData: BenchmarkApiData, difficultyConfig: Difficu
             ? Math.min(...subcategoryHighestRanks)
             : 0;
 
+    // Determine the maximum possible rank for this difficulty
+    const maxPossibleRank = Object.keys(difficultyConfig.rankColors || {}).length;
+
     // Calculate capped progress for each subcategory
     let totalCappedProgress = 0;
     let totalSubcategoryCount = 0;
@@ -1136,23 +1139,27 @@ function calculateBasicRank(apiData: BenchmarkApiData, difficultyConfig: Difficu
         Object.entries(subcategories).forEach(([subcategoryName, rankInfo]) => {
             totalSubcategoryCount++;
 
-            // Calculate capped progress (max 100% toward next rank)
             let cappedProgress = 0;
-            if (rankInfo.baseRank === 0) {
-                // No score in this subcategory = 0% progress
-                cappedProgress = 0;
-            } else if (rankInfo.baseRank > overallRank + 1) {
-                // Already at or beyond the next rank
-                cappedProgress = 1;
-            } else if (rankInfo.baseRank === overallRank + 1) {
-                // Exactly at the next rank
-                cappedProgress = 1;
-            } else if (rankInfo.baseRank === overallRank) {
-                // Progress toward next rank
-                cappedProgress = rankInfo.progressToNext;
+            
+            if (rankInfo.baseRank === 0 || rankInfo.preciseRank === 0) {
+                // No score or unranked: use epsilon (close to 0)
+                cappedProgress = 0.001;
             } else {
-                // Below current rank
-                cappedProgress = 0;
+                // Calculate progress from current overall rank to next rank
+                const currentRankThreshold = overallRank;
+                const nextRankThreshold = overallRank + 1;
+                
+                if (rankInfo.preciseRank < currentRankThreshold) {
+                    // Below current rank
+                    cappedProgress = 0;
+                } else if (rankInfo.preciseRank >= nextRankThreshold) {
+                    // At or beyond next rank (capped at 1.0)
+                    cappedProgress = 1.0;
+                } else {
+                    // Between current and next rank: calculate fractional progress
+                    // preciseRank is in range [currentRankThreshold, nextRankThreshold)
+                    cappedProgress = rankInfo.preciseRank - currentRankThreshold;
+                }
             }
 
             subcategoryProgress[categoryName][subcategoryName] = cappedProgress;
@@ -1160,14 +1167,15 @@ function calculateBasicRank(apiData: BenchmarkApiData, difficultyConfig: Difficu
         });
     });
 
-    const maxRank = Math.max(...subcategoryHighestRanks);
-    const allAtMax = subcategoryHighestRanks.length > 0 && subcategoryHighestRanks.every(r => r === maxRank);
-
-    const avgProgress = allAtMax
-        ? 1
-        : totalSubcategoryCount > 0
-            ? totalCappedProgress / totalSubcategoryCount
-            : 0;
+    // Progress should only be 1.0 if we've achieved the highest rank in the difficulty
+    let avgProgress = 0;
+    if (overallRank >= maxPossibleRank) {
+        // At max rank
+        avgProgress = 1.0;
+    } else if (totalSubcategoryCount > 0) {
+        // Average progress across all subcategories
+        avgProgress = totalCappedProgress / totalSubcategoryCount;
+    }
 
     return {
         rank: overallRank,
