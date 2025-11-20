@@ -42,6 +42,7 @@ class KovaaksRankAPI:
         benchmark_name: str,
         difficulty: str,
         score_overrides: Optional[list[float]] = None,
+        config: Optional[Dict[str, Any]] = None,
         timeout: Optional[float] = 30.0
     ) -> Dict[str, Any]:
         """
@@ -52,6 +53,12 @@ class KovaaksRankAPI:
             benchmark_name: Name of the benchmark (e.g., "Voltaic S4", "Voltaic S5")
             difficulty: Difficulty level (e.g., "Novice", "Intermediate", "Advanced")
             score_overrides: Optional list of score overrides (floats). Use -1 to keep original.
+            config: Optional dict for filtering local stats with keys:
+                - statsDir (str): Path to KovaaK's stats directory
+                - sensitivityLimitCm (float, optional): Sensitivity threshold
+                - sensitivityAboveLimit (bool, optional): True for > limit, False for <= limit
+                - startDate (str, optional): ISO date (YYYY-MM-DD) - only scores on or after this date
+                - endDate (str, optional): ISO date (YYYY-MM-DD) - only scores on or before this date
             timeout: Maximum time to wait for calculation (seconds)
         
         Returns:
@@ -77,6 +84,9 @@ class KovaaksRankAPI:
         
         if score_overrides:
             payload['scoreOverrides'] = score_overrides
+        
+        if config:
+            payload['config'] = config
         
         try:
             result = subprocess.run(

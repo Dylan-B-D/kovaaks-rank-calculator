@@ -13,8 +13,10 @@
  */
 
 import { calculateOverallRank } from '../src/rankCalculations';
+import { calculatePreciseRankFromScore, convertApiScore } from '../src/rankUtils';
 import type { BenchmarkApiData, Benchmark } from '../src/types/benchmarks';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
 
 // Import benchmarks data directly
 // @ts-ignore
@@ -34,6 +36,15 @@ interface CliInput {
 
   // Optional score overrides (array of floats, -1 to keep original)
   scoreOverrides?: number[];
+
+  // Optional configuration for local stats scanning and filtering
+  config?: {
+    statsDir: string;
+    sensitivityLimitCm?: number;  // Optional: sensitivity threshold
+    sensitivityAboveLimit?: boolean;  // Optional: true for > limit, false for <= limit
+    startDate?: string;  // Optional: ISO date (YYYY-MM-DD) - only scores on or after
+    endDate?: string;  // Optional: ISO date (YYYY-MM-DD) - only scores on or before
+  };
 }
 
 interface CliOutput {
@@ -89,6 +100,144 @@ async function fetchApiData(steamId: string, benchmarkId: number): Promise<Bench
   }
 }
 
+function normalizeDate(dateStr: string): string | null {
+  // Normalize date string to YYYY-MM-DD format
+  // Accepts: YYYY-M-D, YYYY-MM-D, YYYY-M-DD, YYYY-MM-DD
+  try {
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return null;
+    
+    const year = parts[0].padStart(4, '0');
+    const month = parts[1].padStart(2, '0');
+    const day = parts[2].padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (e) {
+    return null;
+  }
+}
+
+function parseStatsFile(filePath: string): { name: string, sens: number, score: number, date: string } | null {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    
+    const nameMatch = content.match(/Scenario:,(.+)/);
+    const sensMatch = content.match(/Horiz Sens:,\s*([\d.]+)/);
+    const scoreMatch = content.match(/Score:,\s*([\d.]+)/);
+
+    if (!nameMatch || !sensMatch || !scoreMatch) return null;
+
+    // Extract date from filename
+    // KovaaK's format: "Scenario Name - Challenge - 2024.01.15-12.34.56 Stats.csv"
+    const filename = filePath.split(/[/\\]/).pop() || '';
+    const dateMatch = filename.match(/(\d{4})\.(\d{2})\.(\d{2})-/);
+    let dateStr = '';
+    if (dateMatch) {
+      // Convert to ISO format YYYY-MM-DD
+      dateStr = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+    }
+
+    return {
+      name: nameMatch[1].trim(),
+      sens: parseFloat(sensMatch[1]),
+      score: parseFloat(scoreMatch[1]),
+      date: dateStr
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function applyStatsOverrides(apiData: BenchmarkApiData, config: NonNullable<CliInput['config']>) {
+  if (!apiData.categories) return;
+
+  // Collect target scenarios from apiData
+  const targetScenarios = new Set<string>();
+  for (const category of Object.values(apiData.categories)) {
+    if (category.scenarios) {
+      for (const name of Object.keys(category.scenarios)) {
+        targetScenarios.add(name);
+      }
+    }
+  }
+
+  if (targetScenarios.size === 0) return;
+
+  // Scan stats directory
+  const bestScores = new Map<string, number>();
+  
+  try {
+    const files = readdirSync(config.statsDir);
+    
+    for (const file of files) {
+      if (!file.endsWith(' Stats.csv')) continue;
+      
+      const fullPath = join(config.statsDir, file);
+      const data = parseStatsFile(fullPath);
+      
+      if (!data) continue;
+      if (!targetScenarios.has(data.name)) continue;
+
+      // Check sensitivity constraints if provided
+      if (config.sensitivityLimitCm !== undefined && config.sensitivityAboveLimit !== undefined) {
+        const limit = config.sensitivityLimitCm;
+        const isAbove = config.sensitivityAboveLimit;
+        
+        if (isAbove) {
+          if (data.sens <= limit) continue;
+        } else {
+          if (data.sens > limit) continue;
+        }
+      }
+
+      // Check date constraints if provided
+      // Normalize user input dates to YYYY-MM-DD format for comparison
+      if (config.startDate && data.date) {
+        const normalizedStart = normalizeDate(config.startDate);
+        if (normalizedStart && data.date < normalizedStart) continue;
+      }
+      if (config.endDate && data.date) {
+        const normalizedEnd = normalizeDate(config.endDate);
+        if (normalizedEnd && data.date > normalizedEnd) continue;
+      }
+
+      const currentBest = bestScores.get(data.name) || 0;
+      if (data.score > currentBest) {
+        bestScores.set(data.name, data.score);
+      }
+    }
+  } catch (e) {
+    throw new Error(`Error scanning stats directory: ${(e as Error).message}`);
+  }
+
+  // Apply scores to apiData and recalculate scenario_rank
+  // When using config, we override ALL scenarios:
+  // - If a matching score was found: use it and recalculate rank
+  // - If no matching score was found: set to 0 and mark as unranked
+  for (const category of Object.values(apiData.categories)) {
+    if (!category.scenarios) continue;
+    for (const [name, scenarioData] of Object.entries(category.scenarios)) {
+      const bestScore = bestScores.get(name);
+      if (bestScore !== undefined && bestScore > 0) {
+        // Convert float score to int score
+        const newScore = Math.round(bestScore * 100);
+        scenarioData.score = newScore;
+        
+        // Recalculate scenario_rank based on new score
+        if (scenarioData.rank_maxes && scenarioData.rank_maxes.length > 0) {
+          const convertedScore = convertApiScore(newScore);
+          const rankInfo = calculatePreciseRankFromScore(convertedScore, scenarioData.rank_maxes);
+          scenarioData.scenario_rank = rankInfo.baseRank;
+        }
+      } else {
+        // No matching score found - set to 0 and mark as unranked
+        scenarioData.score = 0;
+        scenarioData.scenario_rank = 0;
+      }
+    }
+  }
+}
+
 function applyScoreOverrides(apiData: BenchmarkApiData, overrides: number[]) {
   if (!apiData.categories || overrides.length === 0) return;
   
@@ -103,7 +252,18 @@ function applyScoreOverrides(apiData: BenchmarkApiData, overrides: number[]) {
         const override = overrides[index];
         if (override !== -1) {
           // Convert float score (e.g. 109.08) to int score (e.g. 10908)
-          scenarioData.score = Math.round(override * 100);
+          const newScore = Math.round(override * 100);
+          scenarioData.score = newScore;
+          
+          // Recalculate scenario_rank based on new score
+          if (scenarioData.rank_maxes && scenarioData.rank_maxes.length > 0) {
+            const convertedScore = convertApiScore(newScore);
+            const rankInfo = calculatePreciseRankFromScore(convertedScore, scenarioData.rank_maxes);
+            scenarioData.scenario_rank = rankInfo.baseRank;
+          } else {
+            // No rank_maxes available, mark as unranked
+            scenarioData.scenario_rank = 0;
+          }
         }
       }
       index++;
@@ -156,6 +316,11 @@ async function main() {
       
     } else {
       throw new Error('Invalid input. Provide either (steamId, benchmarkName, difficulty) OR (apiData, benchmark, difficulty).');
+    }
+
+    // Apply stats overrides if provided
+    if (parsed.config) {
+      applyStatsOverrides(apiData, parsed.config);
     }
 
     // Apply score overrides if provided
