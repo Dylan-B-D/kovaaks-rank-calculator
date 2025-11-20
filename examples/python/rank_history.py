@@ -28,7 +28,7 @@ from kovaaks_rank_api import KovaaksRankAPI, RankCalculatorError
 
 # Constants
 STEAM_ID: str = "00000000000000000" # Dummy ID for structure fetching
-BENCHMARK_NAME: str = "Voltaic S5"
+BENCHMARK_NAME: str = "Voltaic S3"
 DIFFICULTY: str = "Advanced"
 STATS_DIR: str = r"C:\Program Files (x86)\Steam\steamapps\common\FPSAimTrainer\FPSAimTrainer\stats"
 
@@ -247,6 +247,7 @@ class RankHistoryAnalyzer:
             history.append({
                 'date': item.get('date'),
                 'energy': details.get('harmonicMean', None),
+                'progress': details.get('progressToNextRank', 0),
                 'rank': rank_result.get('rank', 0),
                 'rankName': rank_result.get('rankName', 'Unknown')
             })
@@ -259,34 +260,86 @@ class RankHistoryAnalyzer:
             
         return history
 
-    def plot_history(self, history: List[Dict[str, Any]]):
+    def plot_history(self, history: List[Dict[str, Any]], rank_names: List[str] = None):
         if not history or plt is None:
             return
 
         dates = [datetime.strptime(h['date'], "%Y-%m-%d") for h in history]
-        energies = [h['energy'] if h['energy'] is not None else 0 for h in history]
-        ranks = [h['rankName'] for h in history]
+        
+        # Check if we have energy data
+        has_energy = any(h['energy'] is not None and h['energy'] > 0 for h in history)
         
         plt.figure(figsize=(12, 6))
-        plt.plot(dates, energies, marker='o', linestyle='-', color='b', label='Energy')
         
-        last_rank = None
-        for i, (date, energy, rank) in enumerate(zip(dates, energies, ranks)):
-            if rank != last_rank:
-                plt.annotate(
-                    rank, 
-                    (date, energy),
-                    xytext=(0, 10), 
-                    textcoords='offset points',
-                    arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0'),
-                    fontsize=8,
-                    rotation=45
-                )
-                last_rank = rank
+        if has_energy:
+            # Plot Energy
+            values = [h['energy'] if h['energy'] is not None else 0 for h in history]
+            plt.plot(dates, values, marker='o', linestyle='-', color='b', label='Energy')
+            plt.ylabel("Energy (Harmonic Mean)")
+            
+            # Annotate rank changes
+            last_rank = None
+            for i, (date, val, rank) in enumerate(zip(dates, values, [h['rankName'] for h in history])):
+                if rank != last_rank:
+                    plt.annotate(
+                        rank, 
+                        (date, val),
+                        xytext=(0, 10), 
+                        textcoords='offset points',
+                        arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0'),
+                        fontsize=8,
+                        rotation=45
+                    )
+                    last_rank = rank
+        else:
+            # Plot Rank + Progress
+            # Calculate y-values: rank_index + progress
+            # Clamp progress to 0.99 unless it's the max rank
+            max_rank_index = len(rank_names) - 1 if rank_names else 999
+            values = []
+            for h in history:
+                rank = h['rank']
+                progress = h['progress']
                 
+                # Ensure progress is 0.0 for exact rank achievement (handled by calculation usually)
+                # But clamp to 0.99 max unless we are at the absolute highest rank
+                if rank < max_rank_index:
+                    progress = min(progress, 0.99)
+                
+                values.append(rank + progress)
+
+            plt.plot(dates, values, marker='o', linestyle='-', color='g', label='Rank Progress')
+            plt.ylabel("Rank Level")
+            
+            # Set y-ticks to rank names if available
+            if rank_names:
+                # Create ticks for each rank
+                plt.yticks(range(len(rank_names)), rank_names)
+                plt.ylim(bottom=0, top=len(rank_names))
+            
+            # Annotate rank changes
+            last_rank = None
+            for i, (date, val, rank) in enumerate(zip(dates, values, [h['rankName'] for h in history])):
+                if progress > 0.01 and rank != last_rank: # Avoid annotating if just starting
+                     pass
+
+            # Annotate rank changes
+            last_rank = None
+            for i, (date, val, rank) in enumerate(zip(dates, values, [h['rankName'] for h in history])):
+                if rank != last_rank:
+                    plt.annotate(
+                        rank, 
+                        (date, val),
+                        xytext=(0, 10), 
+                        textcoords='offset points',
+                        arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0'),
+                        fontsize=8,
+                        rotation=45
+                    )
+                    last_rank = rank
+
         plt.title(f"Rank History: {BENCHMARK_NAME} - {DIFFICULTY}")
         plt.xlabel("Date")
-        plt.ylabel("Energy (Harmonic Mean)")
         plt.grid(True)
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -301,6 +354,12 @@ def main():
     try:
         api_data = analyzer.fetch_benchmark_structure(BENCHMARK_NAME, DIFFICULTY)
         scenarios = analyzer.get_scenario_names(api_data)
+        
+        # Extract rank names for plotting
+        rank_names = []
+        if 'ranks' in api_data:
+            rank_names = [r['name'] for r in api_data['ranks']]
+            print(f"Found {len(rank_names)} ranks: {', '.join(rank_names[:5])}...")
         
         if not scenarios:
             print("No scenarios found.")
@@ -328,8 +387,8 @@ def main():
         print(f"\n--- Results ---")
         print(f"Total data points: {len(history)}")
         
-        if history:
-            analyzer.plot_history(history)
+        if history: 
+            analyzer.plot_history(history, rank_names)
         
     except Exception as e:
         print(f"Error: {e}")
