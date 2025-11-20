@@ -1,11 +1,11 @@
-# KovaaK's Rank API
+# KovaaKs rank calculator
 
 A rank calculation system for KovaaK's benchmarks.
 Includes a standalone CLI executable and Python bindings.
 
 ## Build the Executable
 
-First, you must build the CLI executable. This handles all the complex logic (fetching data, calculating ranks).
+First, you'll need to build the CLI executable. This handles all logic such as fetching data, calculating ranks etc.
 
 **Prerequisites:** [Node.js](https://nodejs.org/)
 
