@@ -1,5 +1,5 @@
 """
-Rank History Analyzer
+Rank history
 Plots rank history over time by scanning local stats and re-calculating rank
 """
 

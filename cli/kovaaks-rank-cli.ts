@@ -58,6 +58,10 @@ interface CliInput {
     date: string;
     scoreOverrides: number[];
   }>;
+
+  // Optional: Rank history mode - automatically scan stats and calculate rank history
+  // This is the simplified mode that does everything in one call
+  rankHistory?: boolean;
 }
 
 interface CliOutput {
@@ -161,7 +165,139 @@ function parseStatsFile(filePath: string): { name: string, sens: number, score: 
   }
 }
 
+interface ParsedStat {
+  scenarioName: string;
+  score: number;
+  date: string;
+  sensitivity: number;
+}
+
+/**
+ * Parse all stats files and return structured data with dates
+ */
+function parseAllStatsWithDates(
+  statsDir: string,
+  targetScenarios: Set<string>,
+  config?: NonNullable<CliInput['config']>
+): ParsedStat[] {
+  const results: ParsedStat[] = [];
+  
+  try {
+    const files = readdirSync(statsDir);
+    
+    for (const file of files) {
+      if (!file.endsWith(' Stats.csv')) continue;
+      
+      const fullPath = join(statsDir, file);
+      const data = parseStatsFile(fullPath);
+      
+      if (!data) continue;
+      if (!targetScenarios.has(data.name)) continue;
+
+      // Check sensitivity constraints if provided
+      if (config?.sensitivityLimitCm !== undefined && config?.sensitivityAboveLimit !== undefined) {
+        const limit = config.sensitivityLimitCm;
+        const isAbove = config.sensitivityAboveLimit;
+        
+        if (isAbove) {
+          if (data.sens <= limit) continue;
+        } else {
+          if (data.sens > limit) continue;
+        }
+      }
+
+      // Check date constraints if provided
+      if (config?.startDate && data.date) {
+        const normalizedStart = normalizeDate(config.startDate);
+        if (normalizedStart && data.date < normalizedStart) continue;
+      }
+      if (config?.endDate && data.date) {
+        const normalizedEnd = normalizeDate(config.endDate);
+        if (normalizedEnd && data.date > normalizedEnd) continue;
+      }
+
+      results.push({
+        scenarioName: data.name,
+        score: data.score,
+        date: data.date,
+        sensitivity: data.sens
+      });
+    }
+  } catch (e) {
+    throw new Error(`Error scanning stats directory: ${(e as Error).message}`);
+  }
+  
+  return results;
+}
+
+/**
+ * Group parsed stats by date and scenario, keeping max score per scenario up to each date
+ */
+function buildScoresByDate(
+  parsedStats: ParsedStat[],
+  scenarioNames: string[]
+): Map<string, number[]> {
+  // First, group all scores by scenario name
+  const scoresByScenario = new Map<string, Array<{ date: string; score: number }>>();
+  
+  for (const stat of parsedStats) {
+    if (!scoresByScenario.has(stat.scenarioName)) {
+      scoresByScenario.set(stat.scenarioName, []);
+    }
+    scoresByScenario.get(stat.scenarioName)!.push({
+      date: stat.date,
+      score: stat.score
+    });
+  }
+  
+  // Get all unique dates and sort them
+  const uniqueDates = Array.from(new Set(parsedStats.map(s => s.date))).sort();
+  
+  // For each date, build the score override array
+  const scoresByDate = new Map<string, number[]>();
+  
+  for (const date of uniqueDates) {
+    const scoreOverrides: number[] = [];
+    
+    for (const scenarioName of scenarioNames) {
+      const scenarioScores = scoresByScenario.get(scenarioName) || [];
+      
+      // Get all scores up to and including this date
+      const validScores = scenarioScores
+        .filter(s => s.date <= date)
+        .map(s => s.score);
+      
+      // Use max score, or 0 if no scores
+      scoreOverrides.push(validScores.length > 0 ? Math.max(...validScores) : 0);
+    }
+    
+    scoresByDate.set(date, scoreOverrides);
+  }
+  
+  return scoresByDate;
+}
+
+/**
+ * Get ordered scenario names from API data
+ */
+function getOrderedScenarioNames(apiData: BenchmarkApiData): string[] {
+  const names: string[] = [];
+  
+  if (!apiData.categories) return names;
+  
+  for (const category of Object.values(apiData.categories)) {
+    if (category.scenarios) {
+      for (const name of Object.keys(category.scenarios)) {
+        names.push(name);
+      }
+    }
+  }
+  
+  return names;
+}
+
 function applyStatsOverrides(apiData: BenchmarkApiData, config: NonNullable<CliInput['config']>) {
+
   if (!apiData.categories) return;
 
   // Collect target scenarios from apiData
@@ -337,6 +473,97 @@ async function main() {
       console.log(JSON.stringify({ success: true, data: apiData }));
       process.exit(0);
     }
+
+    // Rank History Mode: Automatically scan stats and calculate rank for each date
+    if (parsed.rankHistory) {
+      if (!parsed.config || !parsed.config.statsDir) {
+        throw new Error('Rank history mode requires config.statsDir to be set');
+      }
+
+      console.error('[RANK HISTORY] Starting rank history calculation...');
+      const historyStart = performance.now();
+
+      // Get scenario names from API data
+      const scenarioNames = getOrderedScenarioNames(apiData);
+      const targetScenarios = new Set(scenarioNames);
+      
+      console.error(`[RANK HISTORY] Found ${scenarioNames.length} scenarios in benchmark`);
+
+      // Parse all stats files
+      const parseStart = performance.now();
+      const parsedStats = parseAllStatsWithDates(
+        parsed.config.statsDir,
+        targetScenarios,
+        parsed.config
+      );
+      console.error(`[RANK HISTORY] Parsed ${parsedStats.length} stats files in ${(performance.now() - parseStart).toFixed(2)}ms`);
+
+      if (parsedStats.length === 0) {
+        console.log(JSON.stringify({
+          success: true,
+          history: [],
+          metadata: {
+            totalDates: 0,
+            totalScores: 0,
+            scenarios: scenarioNames
+          }
+        }));
+        process.exit(0);
+      }
+
+      // Build scores by date
+      const groupStart = performance.now();
+      const scoresByDate = buildScoresByDate(parsedStats, scenarioNames);
+      const dates = Array.from(scoresByDate.keys()).sort();
+      console.error(`[RANK HISTORY] Grouped into ${dates.length} unique dates in ${(performance.now() - groupStart).toFixed(2)}ms`);
+
+      // Calculate rank for each date
+      const calcStart = performance.now();
+      const history = [];
+      
+      for (const date of dates) {
+        const scoreOverrides = scoresByDate.get(date)!;
+        
+        // Create a copy of apiData for this date
+        const apiDataCopy = JSON.parse(JSON.stringify(apiData));
+        
+        // Apply score overrides
+        applyScoreOverrides(apiDataCopy, scoreOverrides);
+        
+        // Calculate rank
+        const result = calculateOverallRank(
+          apiDataCopy,
+          benchmark,
+          parsed.difficulty
+        );
+        
+        history.push({
+          date,
+          rank: result.rank,
+          rankName: result.rankName,
+          energy: result.details?.harmonicMean,
+          progress: result.details?.progressToNextRank,
+          details: result.details
+        });
+      }
+      
+      console.error(`[RANK HISTORY] Calculated ranks for ${dates.length} dates in ${(performance.now() - calcStart).toFixed(2)}ms`);
+      console.error(`[RANK HISTORY] Total time: ${(performance.now() - historyStart).toFixed(2)}ms`);
+
+      const output = {
+        success: true,
+        history,
+        metadata: {
+          totalDates: dates.length,
+          totalScores: parsedStats.length,
+          scenarios: scenarioNames
+        }
+      };
+      
+      console.log(JSON.stringify(output));
+      process.exit(0);
+    }
+
 
     // Batch mode: Calculate rank for multiple dates
     if (parsed.batchDates && Array.isArray(parsed.batchDates) && parsed.batchDates.length > 0) {
