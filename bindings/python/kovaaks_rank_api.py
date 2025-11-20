@@ -41,6 +41,7 @@ class KovaaksRankAPI:
         steam_id: str,
         benchmark_name: str,
         difficulty: str,
+        score_overrides: Optional[list[float]] = None,
         timeout: Optional[float] = 30.0
     ) -> Dict[str, Any]:
         """
@@ -50,6 +51,7 @@ class KovaaksRankAPI:
             steam_id: Steam ID (e.g., "76561198218488124")
             benchmark_name: Name of the benchmark (e.g., "Voltaic S4", "Voltaic S5")
             difficulty: Difficulty level (e.g., "Novice", "Intermediate", "Advanced")
+            score_overrides: Optional list of score overrides (floats). Use -1 to keep original.
             timeout: Maximum time to wait for calculation (seconds)
         
         Returns:
@@ -72,6 +74,9 @@ class KovaaksRankAPI:
             'benchmarkName': benchmark_name,
             'difficulty': difficulty
         }
+        
+        if score_overrides:
+            payload['scoreOverrides'] = score_overrides
         
         try:
             result = subprocess.run(

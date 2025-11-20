@@ -31,6 +31,9 @@ interface CliInput {
   
   // Always required
   difficulty: string;
+
+  // Optional score overrides (array of floats, -1 to keep original)
+  scoreOverrides?: number[];
 }
 
 interface CliOutput {
@@ -86,6 +89,28 @@ async function fetchApiData(steamId: string, benchmarkId: number): Promise<Bench
   }
 }
 
+function applyScoreOverrides(apiData: BenchmarkApiData, overrides: number[]) {
+  if (!apiData.categories || overrides.length === 0) return;
+  
+  let index = 0;
+  for (const category of Object.values(apiData.categories)) {
+    if (!category.scenarios) continue;
+    
+    // Iterate over scenarios in the order they appear in the API response object
+    // This matches the order used by the Python script and getOrderedScenarioNames logic
+    for (const scenarioData of Object.values(category.scenarios)) {
+      if (index < overrides.length) {
+        const override = overrides[index];
+        if (override !== -1) {
+          // Convert float score (e.g. 109.08) to int score (e.g. 10908)
+          scenarioData.score = Math.round(override * 100);
+        }
+      }
+      index++;
+    }
+  }
+}
+
 async function main() {
   try {
     let input;
@@ -131,6 +156,11 @@ async function main() {
       
     } else {
       throw new Error('Invalid input. Provide either (steamId, benchmarkName, difficulty) OR (apiData, benchmark, difficulty).');
+    }
+
+    // Apply score overrides if provided
+    if (parsed.scoreOverrides && Array.isArray(parsed.scoreOverrides)) {
+      applyScoreOverrides(apiData, parsed.scoreOverrides);
     }
 
     // Calculate rank
