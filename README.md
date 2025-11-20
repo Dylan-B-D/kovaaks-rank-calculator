@@ -14,6 +14,8 @@ Includes a standalone CLI executable and Python bindings.
 - [Python Examples](examples/python/) - Python scripts
 - [PowerShell Examples](examples/powershell/) - PowerShell usage examples
 
+If needed, an up-to-date version of the benchmarks.json file found in `bindings/data/benchmarks.json` can be found on https://evxl.app/data/benchmarks
+
 ## Build the Executable
 
 First, you'll need to build the CLI executable. This handles all logic such as fetching data, calculating ranks etc.
