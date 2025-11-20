@@ -22,6 +22,12 @@ import { join } from 'path';
 // @ts-ignore
 import benchmarksData from '../bindings/data/benchmarks.json';
 
+// Import package.json for version
+// @ts-ignore
+import packageJson from '../package.json';
+
+const VERSION = packageJson.version;
+
 interface CliInput {
   // Required for Mode 1 Direct Data
   apiData?: BenchmarkApiData;
@@ -421,7 +427,102 @@ function applyScoreOverrides(apiData: BenchmarkApiData, overrides: number[]) {
 }
 
 async function main() {
-  const perfStart = performance.now();
+  
+  // Check for CLI flags
+  const args = process.argv.slice(2);
+  
+  // --version flag
+  if (args.includes('--version') || args.includes('-v')) {
+    console.log(VERSION);
+    process.exit(0);
+  }
+  
+  // --help flag
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+KovaaKs Rank Calculator CLI v${VERSION}
+
+USAGE:
+  echo '<json>' | kovaaks-rank-cli [options]
+
+OPTIONS:
+  --version, -v              Show version number
+  --help, -h                 Show this help message
+  --list-benchmarks          List all available benchmarks
+  --benchmark <name>         Show details for a specific benchmark
+
+EXAMPLES:
+  # Calculate rank
+  echo '{"steamId": "76561198012345678", "benchmarkName": "Voltaic S5", "difficulty": "Advanced"}' | kovaaks-rank-cli
+
+  # List all benchmarks
+  kovaaks-rank-cli --list-benchmarks
+
+  # Show benchmark details
+  kovaaks-rank-cli --benchmark "Voltaic S5"
+
+DOCUMENTATION:
+  https://github.com/Dylan-B-D/kovaaks-rank-calculator
+
+For detailed usage, see docs/cli-usage.md
+`);
+    process.exit(0);
+  }
+  
+  // --list-benchmarks flag
+  if (args.includes('--list-benchmarks')) {
+    const benchmarks = benchmarksData as any[];
+    console.log('\nAvailable Benchmarks:\n');
+    
+    benchmarks.forEach(b => {
+      const difficulties = b.difficulties.map((d: any) => d.difficultyName).join(', ');
+      console.log(`  ${b.benchmarkName}`);
+      console.log(`    Difficulties: ${difficulties}`);
+      console.log('');
+    });
+    
+    console.log(`Total: ${benchmarks.length} benchmarks\n`);
+    process.exit(0);
+  }
+  
+  // --benchmark <name> flag
+  const benchmarkIndex = args.indexOf('--benchmark');
+  if (benchmarkIndex !== -1 && args[benchmarkIndex + 1]) {
+    const benchmarkName = args[benchmarkIndex + 1];
+    const benchmarks = benchmarksData as any[];
+    const benchmark = benchmarks.find(b => 
+      b.benchmarkName.toLowerCase() === benchmarkName.toLowerCase()
+    );
+    
+    if (!benchmark) {
+      console.error(`Error: Benchmark '${benchmarkName}' not found.`);
+      console.error(`\nUse --list-benchmarks to see all available benchmarks.`);
+      process.exit(1);
+    }
+    
+    console.log(`\nBenchmark: ${benchmark.benchmarkName}`);
+    console.log(`Rank Calculation: ${benchmark.rankCalculation}`);
+    console.log(`\nDifficulties:`);
+    
+    benchmark.difficulties.forEach((d: any) => {
+      console.log(`  - ${d.difficultyName} (ID: ${d.kovaaksBenchmarkId})`);
+      
+      if (d.categories && d.categories.length > 0) {
+        const totalScenarios = d.categories.reduce((sum: number, cat: any) => {
+          return sum + cat.subcategories.reduce((subSum: number, sub: any) => {
+            return subSum + sub.scenarioCount;
+          }, 0);
+        }, 0);
+        console.log(`    Scenarios: ${totalScenarios}`);
+        console.log(`    Categories: ${d.categories.map((c: any) => c.categoryName).join(', ')}`);
+      }
+    });
+    
+    console.log('');
+    process.exit(0);
+  }
+  
+  // Normal operation - read from stdin
   try {
     let input;
     try {

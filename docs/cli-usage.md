@@ -8,6 +8,26 @@ The KovaaKs Rank CLI accepts JSON input via stdin and outputs JSON results to st
 - **Output:** JSON written to stdout
 - **Errors:** JSON error messages written to stderr
 
+## CLI Flags
+
+The CLI supports several helpful flags:
+
+```bash
+# Show version
+.\output\kovaaks-rank-cli.exe --version
+.\output\kovaaks-rank-cli.exe -v
+
+# Show help
+.\output\kovaaks-rank-cli.exe --help
+.\output\kovaaks-rank-cli.exe -h
+
+# List all available benchmarks
+.\output\kovaaks-rank-cli.exe --list-benchmarks
+
+# Show details for a specific benchmark
+.\output\kovaaks-rank-cli.exe --benchmark "Voltaic S5"
+```
+
 ## Input Modes
 
 The CLI supports multiple modes of operation. See [API Modes](api-modes.md) for details.

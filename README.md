@@ -103,16 +103,28 @@ You can also provide the raw API data and benchmark definition if you want to av
 
 **Example (Windows PowerShell):**
 ```powershell
-echo '{"steamId": "...", "benchmarkName": "Voltaic S5", "difficulty": "Advanced"}' | output\kovaaks-rank-cli.exe
+echo '{"steamId": "76561198012345678", "benchmarkName": "Voltaic S5", "difficulty": "Advanced"}' | .\output\kovaaks-rank-cli.exe
 ```
 
-## Development structure
-- `src/`: Core TypeScript logic
-- `cli/`: CLI wrapper code
-- `bindings/`: Language bindings (Python) and data
-- `examples/`: Example scripts
-- `docs/`: Documentation
-- `output/`: Compiled executables
+## CLI Flags
+
+The CLI supports several flags:
+
+```bash
+# Show version
+.\output\kovaaks-rank-cli.exe --version
+.\output\kovaaks-rank-cli.exe -v
+
+# Show help
+.\output\kovaaks-rank-cli.exe --help
+.\output\kovaaks-rank-cli.exe -h
+
+# List all available benchmarks
+.\output\kovaaks-rank-cli.exe --list-benchmarks
+
+# Show details for a specific benchmark
+.\output\kovaaks-rank-cli.exe --benchmark "Voltaic S5"
+```
 
 ## License
 GNU GPLv3
