@@ -170,53 +170,6 @@ export type RankInfo = {
 };
 
 /**
- * Represents the structure of the benchmark table component props
- * 
- * Fields:
- * - data: The benchmark data response containing all relevant information
- * - difficultyIndex: Optional index to specify which difficulty to display
- * - overallRankResult: Optional overall rank result for the player in this benchmark
- */
-export type BenchmarkTableProps = {
-  data: BenchmarkDataResponse;
-  difficultyIndex?: number;
-  overallRankResult?: RankCalculationResult;
-};
-
-/**
- * Represents the structure of the Steam profile data
- * 
- * Fields:
- * - steamid: The unique identifier for the Steam user
- * - personaname: The display name of the Steam user
- * - avatarfull: URL to the full avatar image of the Steam user
- * - profileUrl: URL to the user's Steam profile page
- */
-export type SteamProfile = {
-  steamid: string;
-  personaname: string;
-  avatarfull: string;
-  profileUrl: string;
-};
-
-/**
- * Represents the structure of the benchmark data used in the profile page
- * Fields:
- * - message: Optional message, e.g., when no data is available
- * - difficulties: Array of difficulty objects, each containing the difficulty name and API data
- * Each difficulty object has:
- * - difficultyName: The name of the difficulty level
- * - apiData: The API data for this difficulty, containing progress and ranks
- */
-export type BenchmarkData = {
-  message?: string;
-  difficulties?: Array<{
-    difficultyName: string;
-    apiData: BenchmarkApiData;
-  }>;
-};
-
-/**
  * Represents the overall rank result for a player in a benchmark
  * 
  * Fields:
@@ -236,37 +189,8 @@ export type OverallRankResult = {
     tieBreakType?: string;
     harmonicMean?: number;
     pinnacle?: boolean;
+    subcategoryEnergies?: Record<string, Record<string, number>>;
   };
-};
-
-/**
- * Represents a tag associated with a benchmark
- * Fields:
- * - abbreviation: The abbreviation for the tag (e.g., "VT")
- * - color: The color associated with the tag
- */
-export type BenchmarkTag = {
-  abbreviation: string;
-  color: string;
-};
-
-/**
- * Represents a summary of benchmark information
- * Fields:
- * - name: The name of the benchmark
- * - tag: The tag associated with the benchmark
- * - difficultiesCount: The number of difficulties available for this benchmark
- * - totalScenarios: The total number of scenarios across all difficulties
- * - uniqueCategories: List of unique categories across all difficulties
- * - uniqueSubcategories: List of unique subcategories across all difficulties
- */
-export type BenchmarkInfo = {
-  name: string;
-  tag: BenchmarkTag;
-  difficultiesCount: number;
-  totalScenarios: number;
-  uniqueCategories: string[];
-  uniqueSubcategories: string[];
 };
 
 /**
@@ -302,53 +226,6 @@ export type SubcategoryRankInfo = {
 };
 
 /**
- * Represents the subcategory rank details for a player in a benchmark
- * Fields:
- * - category: The category of the subcategory
- * - subcategory: The name of the subcategory
- * - baseRank: The base rank for the subcategory
- * - preciseRank: The precise rank for the subcategory
- * - scenarioName: The name of the scenario associated with this subcategory
- * - score: The score achieved in this subcategory
- */
-export type SubcategoryRank = {
-    category: string;
-    subcategory: string;
-    baseRank: number;
-    preciseRank: number;
-    scenarioName: string;
-    score: number;
-};
-
-/**
- * Represents the props for the BenchmarkDetails component
- * 
- * Fields:
- * - benchmarkData: The benchmark data response containing all relevant information
- * - selectedDifficulty: Optional difficulty name to filter the displayed data
- * - overallRankDetails: Optional overall rank details for the player in this benchmark
- */
-export type BenchmarkDetailsProps = {
-    benchmarkData?: BenchmarkDataResponse | null;
-    selectedDifficulty?: string;
-    overallRankDetails?: any;
-};
-
-/**
- * Represents the props for the RankSummary component
- * 
- * Fields:
- * - overallRank: The overall rank of the player in the benchmark
- * - limitingSubcategory: The subcategory that limits the overall rank, if applicable
- * - rankColors: Mapping of rank names to their associated colors
- */
-export type RankSummaryProps = {
-    overallRank: number;
-    limitingSubcategory: SubcategoryRank | undefined;
-    rankColors: Record<string, string>;
-};
-
-/**
  * Calculates CA-S1, VT-Energy, or custom harmonic mean ranks
  */
 export type HarmonicRankConfig = {
@@ -356,32 +233,4 @@ export type HarmonicRankConfig = {
     fakeLowerOffset: number;
     fakeUpperCount: number;
     filterSubcategories?: (subcategory: Subcategory) => boolean;
-};
-
-/**
- * Represents a row in the benchmark table.
- * Fields:
- * - categoryName: Name of the benchmark category
- * - categoryColor: Color associated with the category
- * - subcategoryName: Name of the benchmark subcategory
- * - subcategoryColor: Color associated with the subcategory
- * - scenarioName: Name of the benchmark scenario
- * - score: Score achieved in the scenario
- * - rank: Rank achieved in the scenario
- * - rankMaxes: Array ofd score thresholds for each rank
- */
-export type TableRow = {
-  categoryName: string;
-  categoryColor: string;
-  subcategoryName: string;
-  subcategoryColor: string;
-  scenarioName: string;
-  score: number;
-  rank: number;
-  rankMaxes: number[];
-};
-
-export type IconProps = {
-  size?: number;
-  className?: string;
 };
