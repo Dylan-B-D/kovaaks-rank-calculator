@@ -1102,7 +1102,8 @@ function calculateVtEnergyRank(apiData: BenchmarkApiData, difficultyConfig: Diff
 }
 
 /**
- * Calculates basic rank (Voltaic Season 3 and Revosect Season 1)
+ * Calculates basic rank
+ * Requires the rank to be achieved in all subcategories
  */
 function calculateBasicRank(apiData: BenchmarkApiData, difficultyConfig: Difficulty): RankCalculationResult {
     const { subcategoryRanks } = getSubcategoryHighestRanks(apiData, difficultyConfig);

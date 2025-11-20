@@ -564,7 +564,6 @@ async function main() {
       process.exit(0);
     }
 
-
     // Batch mode: Calculate rank for multiple dates
     if (parsed.batchDates && Array.isArray(parsed.batchDates) && parsed.batchDates.length > 0) {
       if (!parsed.config || !parsed.config.statsDir) {
