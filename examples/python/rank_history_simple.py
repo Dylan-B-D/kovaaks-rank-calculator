@@ -20,7 +20,7 @@ except ImportError:
 
 # Constants
 STEAM_ID: str = "76561198218488124"
-BENCHMARK_NAME: str = "Voltaic S3"
+BENCHMARK_NAME: str = "Voltaic S4"
 DIFFICULTY: str = "Advanced"
 STATS_DIR: str = r"C:\Program Files (x86)\Steam\steamapps\common\FPSAimTrainer\FPSAimTrainer\stats"
 

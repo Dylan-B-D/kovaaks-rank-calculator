@@ -6,6 +6,7 @@ output/
 *.exe
 dist/
 build/
+examples/python/rank_history.html
 
 # Python
 __pycache__/
