@@ -250,7 +250,7 @@ def create_multi_benchmark_plot(histories: dict):
     # Layout
     fig.update_layout(
         title={
-            'text': f'{DISPLAY_NAME}\'s Voltaic Progression',
+            'text': f'{DISPLAY_NAME}\'s Progression',
             'x': 0.5,
             'xanchor': 'center',
             'font': {'size': 32, 'color': '#FFFFFF', 'family': 'Arial Black'}
