@@ -44,11 +44,30 @@ You can use the Python wrapper to calculate ranks.
 
 ### Setup
 
-Either:
-1. Copy `bindings/python/kovaaks_rank_api.py` to your project.
-2. Or add `bindings/python` to your Python path.
+There are a few ways to set up the Python bindings:
 
-**Important:** If you move the Python file, you must tell it where the executable is located.
+#### Option 1: Install in Editable Mode (Recommended)
+This installs the package in your current environment while keeping the files linked to the source.
+```bash
+pip install -e .
+```
+
+#### Option 2: Configure VS Code
+If you prefer not to install the package, you can configure VS Code to recognize the bindings directory.
+
+1. Create or edit `.vscode/settings.json` in your workspace.
+2. Add the following configuration:
+   ```json
+   {
+       "python.analysis.extraPaths": ["./bindings/python"]
+   }
+   ```
+3. **Restart VS Code** (or run "Developer: Reload Window") for the changes to take effect.
+
+#### Option 3: Copy the File
+Simply copy `bindings/python/kovaaks_rank_api.py` directly into your project directory.
+
+**Important:** If you move the Python file or use it from a different location, you must tell it where the executable is located (see Usage below).
 
 ### Usage
 

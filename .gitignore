@@ -18,6 +18,8 @@ env/
 venv/
 ENV/
 .venv
+*.egg-info/
+.eggs/
 
 # IDE
 .vscode/
