@@ -18,7 +18,7 @@ except ImportError:
     sys.exit(1)
 
 # Configuration
-DISPLAY_NAME = "Your Display Name"
+DISPLAY_NAME = "EviL"
 STEAM_ID = "00000000000000000" # not needed so we can use dummy
 STATS_DIR = r"C:\Program Files (x86)\Steam\steamapps\common\FPSAimTrainer\FPSAimTrainer\stats"
 

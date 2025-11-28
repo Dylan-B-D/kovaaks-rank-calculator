@@ -949,9 +949,8 @@ function calculateTskRank(apiData: BenchmarkApiData, difficultyConfig: Difficult
 
         const nextRank = currentRank + 1;
         const cumulative = ranks.filter(r => r >= nextRank && r <= maxRank).reduce((sum, r) => sum + (rankCounts[r] || 0), 0);
-        const neededForNext = needed - cumulative;
-        const availableAtCurrent = rankCounts[currentRank] || 0;
-        return availableAtCurrent > 0 ? Math.max(0, Math.min(neededForNext / availableAtCurrent, 1)) : 0;
+        
+        return Math.min(cumulative / needed, 1);
     };
 
     let finalRank = 0, achievementType = 'none', progressToNextRank = 0;
